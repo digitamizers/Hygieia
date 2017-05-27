@@ -1,11 +1,15 @@
 package com.capitalone.dashboard.collector;
 
-import com.capitalone.dashboard.model.Commit;
-import com.capitalone.dashboard.model.CommitType;
-import com.capitalone.dashboard.model.GitHubRepo;
-import com.capitalone.dashboard.util.Encryption;
-import com.capitalone.dashboard.util.EncryptionException;
-import com.capitalone.dashboard.util.Supplier;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.TimeZone;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
@@ -21,18 +25,16 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.TimeZone;
+import com.capitalone.dashboard.model.Commit;
+import com.capitalone.dashboard.model.CommitType;
+import com.capitalone.dashboard.model.GitHubRepo;
+import com.capitalone.dashboard.util.Encryption;
+import com.capitalone.dashboard.util.EncryptionException;
+import com.capitalone.dashboard.util.Supplier;
 
 /**
  * GitHubClient implementation that uses SVNKit to fetch information about
@@ -170,6 +172,111 @@ public class DefaultGitHubClient implements GitHubClient {
         return commits;
     }
 
+    @Override
+    @SuppressWarnings({"PMD.NPathComplexity", "PMD.ExcessiveMethodLength"}) 
+    public List<Commit> getCommits() throws RestClientException {
+
+        List<Commit> commits = new ArrayList<>();
+       
+        // format URL
+        String repoUrl = settings.getRepoUrl();
+        if (repoUrl.endsWith(".git")) {
+            repoUrl = repoUrl.substring(0, repoUrl.lastIndexOf(".git"));
+        }
+        URL url;
+        String hostName = "";
+        String protocol = "";
+        try {
+            url = new URL(repoUrl);
+            hostName = url.getHost();
+            protocol = url.getProtocol();
+        } catch (MalformedURLException e) {
+            // TODO Auto-generated catch block
+            LOG.error(e.getMessage());
+        }
+        String hostUrl = protocol + "://" + hostName + "/";
+        String repoName = repoUrl.substring(hostUrl.length(), repoUrl.length());
+        String apiUrl;
+        if (hostName.startsWith(PUBLIC_GITHUB_HOST_NAME)) {
+            apiUrl = protocol + "://" + PUBLIC_GITHUB_REPO_HOST + repoName;
+        } else {
+            apiUrl = protocol + "://" + hostName + SEGMENT_API + repoName;
+            LOG.debug("API URL IS:" + apiUrl);
+        }
+        Date dt;
+       
+            int firstRunDaysHistory = settings.getFirstRunHistoryDays();
+            if (firstRunDaysHistory > 0) {
+                dt = getDate(new Date(), -firstRunDaysHistory, 0);
+            } else {
+                dt = getDate(new Date(), -FIRST_RUN_HISTORY_DEFAULT, 0);
+            }
+       
+        Calendar calendar = new GregorianCalendar();
+        TimeZone timeZone = calendar.getTimeZone();
+        Calendar cal = Calendar.getInstance(timeZone);
+        cal.setTime(dt);
+        String thisMoment = String.format("%tFT%<tRZ", cal);
+
+        String queryUrl = apiUrl.concat("/commits?sha=" + settings.getBranch()
+                + "&since=" + thisMoment);
+        
+        String password = null;
+        String userId=null;
+        if (!StringUtils.isEmpty(settings.getPassword()) && !StringUtils.isEmpty(settings.getUserId())) {
+			 password = new String(Base64.decodeBase64(settings.getPassword()));
+			 userId= new String(Base64.decodeBase64(settings.getUserId()));
+			}
+        boolean lastPage = false;
+        int pageNumber = 1;
+        String queryUrlPage = queryUrl;
+        while (!lastPage) {
+          //  ResponseEntity<String> response = makeRestCall(queryUrlPage, repo.getUserId(), decryptedPassword);
+            ResponseEntity<String> response = makeRestCall(queryUrlPage, userId, password);
+            JSONArray jsonArray = paresAsArray(response);
+            for (Object item : jsonArray) {
+                JSONObject jsonObject = (JSONObject) item;
+                String sha = str(jsonObject, "sha");
+                JSONObject commitObject = (JSONObject) jsonObject.get("commit");
+                JSONObject authorObject = (JSONObject) commitObject.get("author");
+                String message = str(commitObject, "message");
+                String author = str(authorObject, "name");
+                long timestamp = new DateTime(str(authorObject, "date"))
+                        .getMillis();
+                JSONArray parents = (JSONArray) jsonObject.get("parents");
+                List<String> parentShas = new ArrayList<>();
+                if (parents != null) {
+                    for (Object parentObj : parents) {
+                        parentShas.add(str((JSONObject) parentObj, "sha"));
+                    }
+                }
+
+                Commit commit = new Commit();
+                commit.setTimestamp(System.currentTimeMillis());
+                commit.setScmUrl(settings.getRepoUrl());
+                commit.setScmBranch(settings.getBranch());
+                commit.setScmRevisionNumber(sha);
+                commit.setScmParentRevisionNumbers(parentShas);
+                commit.setScmAuthor(author);
+                commit.setScmCommitLog(message);
+                commit.setScmCommitTimestamp(timestamp);
+                commit.setNumberOfChanges(1);
+                commit.setType(getCommitType(CollectionUtils.size(parents), message));
+                commit.setAssetId(settings.getAssetId());
+                commits.add(commit);
+            }
+            if (CollectionUtils.isEmpty(jsonArray)) {
+                lastPage = true;
+            } else {
+                lastPage = isThisLastPage(response);
+                pageNumber++;
+                queryUrlPage = queryUrl + "&page=" + pageNumber;
+            }
+        }
+        return commits;
+    }
+    
+    
     private CommitType getCommitType(int parentSize, String commitMessage) {
         if (parentSize > 1) return CommitType.Merge;
         if (settings.getNotBuiltCommits() == null) return CommitType.New;

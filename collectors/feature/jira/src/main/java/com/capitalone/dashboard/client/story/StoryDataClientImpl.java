@@ -234,7 +234,8 @@ public class StoryDataClientImpl implements StoryDataClient {
 					// Type
 					feature.setsTypeId(TOOLS.sanitizeResponse(issueType.getId()));
 					feature.setsTypeName(TOOLS.sanitizeResponse(issueType.getName()));
-
+					//Asset Id
+					feature.setAssetId(featureSettings.getAssetId());
 					processFeatureData(feature, issue, fields);
 					
 					// delay processing epic data for performance

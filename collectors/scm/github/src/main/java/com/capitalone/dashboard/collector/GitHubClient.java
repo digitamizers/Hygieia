@@ -19,5 +19,10 @@ public interface GitHubClient {
      */
 
 	List<Commit> getCommits(GitHubRepo repo, boolean firstRun);
-
+	
+	/**
+	 * Fetch all commits for the repository named in properties file
+	 * @return all commits 
+	 */
+	List<Commit> getCommits() ;
 }

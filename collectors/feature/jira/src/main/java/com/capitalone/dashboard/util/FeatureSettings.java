@@ -90,6 +90,8 @@ public class FeatureSettings {
 	private String jiraStoryPointsFieldName;
 	
 	private String jiraTeamFieldName;
+	
+	private String assetId;
 
 	public String getCron() {
 		return this.cron;
@@ -329,5 +331,13 @@ public class FeatureSettings {
 
 	public void setJiraTeamFieldName(String jiraTeamFieldName) {
 		this.jiraTeamFieldName = jiraTeamFieldName;
+	}
+
+	public String getAssetId() {
+		return assetId;
+	}
+
+	public void setAssetId(String assetId) {
+		this.assetId = assetId;
 	}
 }

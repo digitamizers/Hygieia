@@ -1,8 +1,11 @@
 package com.capitalone.dashboard.collector;
 
-import com.capitalone.dashboard.model.Collector;
-import com.capitalone.dashboard.repository.BaseCollectorRepository;
-import com.google.common.base.Strings;
+import java.util.Date;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +13,10 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import com.capitalone.dashboard.model.Collector;
+import com.capitalone.dashboard.repository.BaseCollectorRepository;
+import com.capitalone.dashboard.util.FeatureCollectorConstants;
+import com.google.common.base.Strings;
 
 /**
  * Base class for Collector task implementation which provides subclasses with
@@ -70,8 +75,14 @@ public abstract class CollectorTask<T extends Collector> implements Runnable {
 
     @PostConstruct
     public void onStartup() {
+    	if(isNoCronCollector()){
+       	 taskScheduler.schedule(this, DateUtils.addMinutes(new Date(), 1));
+       	}
+       	else
+       	{
         taskScheduler.schedule(this, new CronTrigger(getCron()));
         setOnline(true);
+       	}
     }
 
     @PreDestroy
@@ -121,5 +132,10 @@ public abstract class CollectorTask<T extends Collector> implements Runnable {
         LOGGER.info("-----------------------------------");
         LOGGER.info(instanceUrl);
         LOGGER.info("-----------------------------------");
+    }
+    
+    private boolean isNoCronCollector()
+    {
+    	return collectorName.equals(FeatureCollectorConstants.JIRA) | collectorName.equals(FeatureCollectorConstants.GITHUB);
     }
 }

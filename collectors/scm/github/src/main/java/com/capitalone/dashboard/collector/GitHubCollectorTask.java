@@ -1,16 +1,11 @@
 package com.capitalone.dashboard.collector;
 
 
-import com.capitalone.dashboard.model.CollectionError;
-import com.capitalone.dashboard.model.Collector;
-import com.capitalone.dashboard.model.CollectorItem;
-import com.capitalone.dashboard.model.CollectorType;
-import com.capitalone.dashboard.model.Commit;
-import com.capitalone.dashboard.model.GitHubRepo;
-import com.capitalone.dashboard.repository.BaseCollectorRepository;
-import com.capitalone.dashboard.repository.CommitRepository;
-import com.capitalone.dashboard.repository.ComponentRepository;
-import com.capitalone.dashboard.repository.GitHubRepoRepository;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bson.types.ObjectId;
@@ -20,10 +15,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.capitalone.dashboard.model.Collector;
+import com.capitalone.dashboard.model.CollectorItem;
+import com.capitalone.dashboard.model.CollectorType;
+import com.capitalone.dashboard.model.Commit;
+import com.capitalone.dashboard.model.GitHubRepo;
+import com.capitalone.dashboard.repository.BaseCollectorRepository;
+import com.capitalone.dashboard.repository.CommitRepository;
+import com.capitalone.dashboard.repository.ComponentRepository;
+import com.capitalone.dashboard.repository.GitHubRepoRepository;
 
 /**
  * CollectorTask that fetches Commit information from GitHub
@@ -38,7 +38,7 @@ public class GitHubCollectorTask extends CollectorTask<Collector> {
     private final GitHubClient gitHubClient;
     private final GitHubSettings gitHubSettings;
     private final ComponentRepository dbComponentRepository;
-    private static final long FOURTEEN_DAYS_MILLISECONDS = 14 * 24 * 60 * 60 * 1000;
+  //  private static final long FOURTEEN_DAYS_MILLISECONDS = 14 * 24 * 60 * 60 * 1000;
 
     @Autowired
     public GitHubCollectorTask(TaskScheduler taskScheduler,
@@ -118,8 +118,8 @@ public class GitHubCollectorTask extends CollectorTask<Collector> {
         gitHubRepoRepository.save(repoList);
     }
 
-
-    @Override
+  //Original collect Method which gets repositories from database
+   /* @Override
     public void collect(Collector collector) {
 
         logBanner("Starting...");
@@ -163,8 +163,39 @@ public class GitHubCollectorTask extends CollectorTask<Collector> {
         log("New Commits", start, commitCount);
 
         log("Finished", start);
-    }
+    }*/
 
+    @Override
+   	public void collect(Collector collector) {
+
+   		logBanner("Starting...");
+   		long start = System.currentTimeMillis();
+   		int commitCount = 0;
+
+   		try {
+   			for (Commit commit : gitHubClient.getCommits()) {
+   				if(isNewCommit(commit))
+   				{
+   				LOG.debug(commit.getTimestamp() + ":::" + commit.getScmCommitLog());
+   				commitRepository.save(commit);
+   				commitCount++;
+   				}
+
+   			}
+
+   		} catch (HttpStatusCodeException hc) {
+
+   			LOG.error("Error fetching commits for:" + gitHubSettings.getRepoUrl(), hc);
+   		} catch (RestClientException re) {
+
+   			LOG.error("Error fetching commits for:" + gitHubSettings.getRepoUrl(), re);
+   		}
+
+   		log("New Commits", start, commitCount);
+
+   		log("Finished", start);
+   	}
+    
 
     private List<GitHubRepo> enabledRepos(Collector collector) {
         return gitHubRepoRepository.findEnabledGitHubRepos(collector.getId());
@@ -174,6 +205,11 @@ public class GitHubCollectorTask extends CollectorTask<Collector> {
     private boolean isNewCommit(GitHubRepo repo, Commit commit) {
         return commitRepository.findByCollectorItemIdAndScmRevisionNumber(
                 repo.getId(), commit.getScmRevisionNumber()) == null;
+    }
+
+    private boolean isNewCommit(Commit commit) {
+        return commitRepository.findByScmUrlAndScmBranchAndScmRevisionNumber(
+        		gitHubSettings.getRepoUrl(),gitHubSettings.getBranch(), commit.getScmRevisionNumber()) == null;
     }
 
 

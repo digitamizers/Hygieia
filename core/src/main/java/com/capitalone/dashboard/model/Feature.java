@@ -52,6 +52,8 @@ public class Feature extends BaseModel {
 	@Indexed
 	private String changeDate;
 	private String isDeleted;
+	@Indexed
+	private String assetId;
 
 	/*
 	 * Owner data
@@ -265,6 +267,14 @@ public class Feature extends BaseModel {
 
 	public void setIsDeleted(String isDeleted) {
 		this.isDeleted = isDeleted;
+	}
+
+	public String getAssetId() {
+		return assetId;
+	}
+
+	public void setAssetId(String assetId) {
+		this.assetId = assetId;
 	}
 
 	public void setsProjectName(String sProjectName) {
