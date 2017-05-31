@@ -128,6 +128,7 @@ public class DefaultHudsonClientTests {
         settings.setServers(servers);
         settings.setUsernames(usernames);
         settings.setApiKeys(apiKeys);
+        settings.setAssetId("assetIdForTest");
         defaultHudsonClient.makeRestCall("http://user:pass@jenkins.com");
         verify(rest).exchange(Matchers.any(URI.class), eq(HttpMethod.GET),
                 eq(headers), eq(String.class));

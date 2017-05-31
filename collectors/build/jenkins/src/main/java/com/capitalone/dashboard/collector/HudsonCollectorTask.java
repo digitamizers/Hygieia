@@ -82,7 +82,7 @@ public class HudsonCollectorTask extends CollectorTask<HudsonCollector> {
         List<String> activeServers = new ArrayList<>();
         activeServers.addAll(collector.getBuildServers());
 
-        clean(collector, existingJobs);
+       // clean(collector, existingJobs);
 
         for (String instanceUrl : collector.getBuildServers()) {
             logBanner(instanceUrl);
@@ -93,7 +93,7 @@ public class HudsonCollectorTask extends CollectorTask<HudsonCollector> {
                 activeJobs.addAll(buildsByJob.keySet());
                 addNewJobs(buildsByJob.keySet(), existingJobs, collector);
                 addNewBuilds(enabledJobs(collector, instanceUrl), buildsByJob);
-                log("Finished", start);
+                log("Finished", start); 
             } catch (RestClientException rce) {
                 activeServers.remove(instanceUrl); // since it was a rest exception, we will not delete this job  and wait for
                 // rest exceptions to clear up at a later run.
@@ -194,6 +194,7 @@ public class HudsonCollectorTask extends CollectorTask<HudsonCollector> {
                             .getBuildUrl(), job.getInstanceUrl());
                     if (build != null) {
                         build.setCollectorItemId(job.getId());
+                        build.setAssetId(hudsonSettings.getAssetId());
                         buildRepository.save(build);
                         count++;
                     }
@@ -228,7 +229,8 @@ public class HudsonCollectorTask extends CollectorTask<HudsonCollector> {
             String niceName = getNiceName(job, collector);
             if (existing == null) {
                 job.setCollectorId(collector.getId());
-                job.setEnabled(false); // Do not enable for collection. Will be enabled when added to dashboard
+               // job.setEnabled(false); // Do not enable for collection. Will be enabled when added to dashboard
+                job.setEnabled(true);//Enabling for collection-Change made to add asset Id
                 job.setDescription(job.getJobName());
                 if (StringUtils.isNotEmpty(niceName)) {
                     job.setNiceName(niceName);

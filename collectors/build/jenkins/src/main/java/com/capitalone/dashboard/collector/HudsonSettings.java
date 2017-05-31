@@ -22,6 +22,7 @@ public class HudsonSettings {
     private List<String> apiKeys;
     private String dockerLocalHostIP; //null if not running in docker on http://localhost
     private int pageSize;
+    private String assetId;
     @Value("${folderDepth:10}")
     private int folderDepth;
 
@@ -98,7 +99,15 @@ public class HudsonSettings {
 		return pageSize;
 	}
 
-    public void setFolderDepth(int folderDepth) {
+    public String getAssetId() {
+		return assetId;
+	}
+
+	public void setAssetId(String assetId) {
+		this.assetId = assetId;
+	}
+
+	public void setFolderDepth(int folderDepth) {
         this.folderDepth = folderDepth;
     }
 
