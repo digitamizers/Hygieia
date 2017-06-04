@@ -2,12 +2,18 @@ package com.capitalone.dashboard.data;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
+import com.capitalone.dashboard.collector.FeatureSettings;
 import com.capitalone.dashboard.gitlab.model.GitlabIssue;
 import com.capitalone.dashboard.gitlab.model.GitlabMilestone;
 import com.capitalone.dashboard.gitlab.model.GitlabNamespace;
@@ -19,9 +25,13 @@ import com.capitalone.dashboard.model.Team;
 import com.capitalone.dashboard.util.FeatureCollectorConstants;
 import com.google.common.collect.Lists;
 
+@RunWith(MockitoJUnitRunner.class)
 public class FeatureDataMapperTest {
 	
-	private FeatureDataMapper mapper = new FeatureDataMapper();
+	@Mock
+	private FeatureSettings settings;
+	@InjectMocks
+	private FeatureDataMapper mapper;
 
 	@Test
 	public void shouldMapGitlabTeamToScopeOwnerCollectorItem() {
@@ -80,11 +90,12 @@ public class FeatureDataMapperTest {
 		List<String> inProgressLabelsForProject = Lists.newArrayList("Doing", "ToDo");
 		ObjectId existingIssueId = new ObjectId();
 		ObjectId gitlabCollectorId = new ObjectId();
-		
+		when(settings.getAssetId()).thenReturn("gitlabAssetId");
 		Feature result = mapper.mapToFeatureItem(issue , inProgressLabelsForProject , existingIssueId, gitlabCollectorId);
 		
 		assertNotNull(result);
 		assertEquals("In Progress", result.getsStatus());
+		assertEquals("gitlabAssetId", result.getAssetId());
 		assertEquals(FeatureCollectorConstants.SPRINT_KANBAN, result.getsSprintID());
 	}
 	

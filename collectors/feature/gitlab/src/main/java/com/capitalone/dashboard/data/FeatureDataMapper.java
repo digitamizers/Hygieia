@@ -7,8 +7,10 @@ import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.capitalone.dashboard.collector.FeatureSettings;
 import com.capitalone.dashboard.gitlab.model.GitlabIssue;
 import com.capitalone.dashboard.gitlab.model.GitlabProject;
 import com.capitalone.dashboard.gitlab.model.GitlabTeam;
@@ -27,6 +29,12 @@ public class FeatureDataMapper {
 	private static final String FEATURE_DONE_STATUS = "Done";
 	private static final String GITLAB_DONE_STATUS = "closed";
 
+    private final FeatureSettings settings;
+	
+	@Autowired
+	public FeatureDataMapper(FeatureSettings settings) {
+		this.settings = settings;
+	}
 	public Team mapToTeam(GitlabTeam gitlabTeam, ObjectId existingTeamId, ObjectId gitlabFeatureCollectorId) {
 		String teamId = String.valueOf(gitlabTeam.getId());
 		
@@ -75,7 +83,7 @@ public class FeatureDataMapper {
 		issue.setsState(ACTIVE_ASSET_STATE);
 		issue.setsEstimate(String.valueOf(gitlabIssue.getWeight()));
 		issue.setChangeDate(gitlabIssue.getUpdatedAt());
-		
+		issue.setAssetId(settings.getAssetId());
 		//Project Data
 		issue.setsProjectID(projectId);
 		issue.setsProjectName(EMPTY_STRING);

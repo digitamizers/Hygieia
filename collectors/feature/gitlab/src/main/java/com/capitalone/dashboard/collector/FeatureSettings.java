@@ -30,7 +30,8 @@ public class FeatureSettings {
 	private String path;
 	private String apiToken;
 	private boolean selfSignedCertificate;
-
+    private String assetId;
+    
 	public String getCron() {
 		return cron;
 	}
@@ -87,7 +88,15 @@ public class FeatureSettings {
         this.selfSignedCertificate = selfSignedCertificate;
     }
     
-    @PostConstruct
+    public String getAssetId() {
+		return assetId;
+	}
+
+	public void setAssetId(String assetId) {
+		this.assetId = assetId;
+	}
+
+	@PostConstruct
     public void trustSelfSignedCertificatesIfNecessary() {
         if (isSelfSignedCertificate()) {
             try {
