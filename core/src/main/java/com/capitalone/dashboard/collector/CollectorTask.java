@@ -136,6 +136,6 @@ public abstract class CollectorTask<T extends Collector> implements Runnable {
     
     private boolean isNoCronCollector()
     {
-    	return collectorName.equals(FeatureCollectorConstants.JIRA) | collectorName.equals(FeatureCollectorConstants.GITHUB) | collectorName.equals(FeatureCollectorConstants.HUDSON)| collectorName.equals(FeatureCollectorConstants.GITLAB);
+    	return collectorName.equals(FeatureCollectorConstants.JIRA) | collectorName.equals(FeatureCollectorConstants.GITHUB) | collectorName.equals(FeatureCollectorConstants.HUDSON)| collectorName.equals(FeatureCollectorConstants.GITLAB)|collectorName.equals(FeatureCollectorConstants.SONAR);
     }
 }

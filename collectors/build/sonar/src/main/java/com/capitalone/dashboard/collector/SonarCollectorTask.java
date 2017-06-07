@@ -66,8 +66,9 @@ public class SonarCollectorTask extends CollectorTask<SonarCollector> {
     public String getCron() {
         return sonarSettings.getCron();
     }
+    //Original collect Method which gets enabled projects and collects data for only them
 
-    @Override
+/*    @Override
     public void collect(SonarCollector collector) {
         long start = System.currentTimeMillis();
 
@@ -101,9 +102,45 @@ public class SonarCollectorTask extends CollectorTask<SonarCollector> {
             }
         }
         deleteUnwantedJobs(latestProjects, existingProjects, collector);
+    }*/
+
+ 
+   
+    @Override
+    public void collect(SonarCollector collector) {
+        long start = System.currentTimeMillis();
+
+        Set<ObjectId> udId = new HashSet<>();
+        udId.add(collector.getId());
+        List<SonarProject> existingProjects = sonarProjectRepository.findByCollectorIdIn(udId);
+        List<SonarProject> latestProjects = new ArrayList<>();
+      //  clean(collector, existingProjects);
+
+        if (!CollectionUtils.isEmpty(collector.getSonarServers())) {
+            
+            for (int i = 0; i < collector.getSonarServers().size(); i++) {
+
+                String instanceUrl = collector.getSonarServers().get(i);
+                Double version = collector.getSonarVersions().get(i);
+                String metrics = collector.getSonarMetrics().get(i);
+
+                logBanner(instanceUrl);
+                SonarClient sonarClient = sonarClientSelector.getSonarClient(version);
+                List<SonarProject> projects = sonarClient.getProjects(instanceUrl);
+                latestProjects.addAll(projects);
+
+                int projSize = ((CollectionUtils.isEmpty(projects)) ? 0 : projects.size());
+                log("Fetched projects   " + projSize, start);
+
+                addNewProjects(projects, existingProjects, collector);
+
+                refreshData(enabledProjects(collector, instanceUrl), sonarClient,metrics);
+
+                log("Finished", start);
+            }
+        }
+        deleteUnwantedJobs(latestProjects, existingProjects, collector);
     }
-
-
 	/**
 	 * Clean up unused sonar collector items
 	 *
@@ -170,6 +207,7 @@ public class SonarCollectorTask extends CollectorTask<SonarCollector> {
             CodeQuality codeQuality = sonarClient.currentCodeQuality(project, metrics);
             if (codeQuality != null && isNewQualityData(project, codeQuality)) {
                 codeQuality.setCollectorItemId(project.getId());
+                codeQuality.setAssetId(sonarSettings.getAssetId());
                 codeQualityRepository.save(codeQuality);
                 count++;
             }
@@ -188,7 +226,7 @@ public class SonarCollectorTask extends CollectorTask<SonarCollector> {
         for (SonarProject project : projects) {
             if (!existingProjects.contains(project)) {
                 project.setCollectorId(collector.getId());
-                project.setEnabled(false);
+                project.setEnabled(true);//Enabling all the projects
                 project.setDescription(project.getProjectName());
                 newProjects.add(project);
                 count++;
