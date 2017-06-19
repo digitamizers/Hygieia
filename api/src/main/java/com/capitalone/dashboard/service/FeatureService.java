@@ -64,6 +64,18 @@ public interface FeatureService {
 			String teamId, String projectId, Optional<String> agileType, Optional<String> estimateMetricType);
 	
 	/**
+	 * Retrieves all unique super features and their total sub feature estimates
+	 * for a given team and their current sprint
+	 * @param assetId Unique id for each Feature
+	 * @param teamId  A given scope-owner's source-system ID
+	 * @param projectId
+	 * @param agileType Agile type to be retrieved (e.g., kanban | scrum)
+	 * @param estimateMetricType The reporting metric (hours | storypoints)
+	 * @return
+	 */
+	DataResponse<List<Feature>> getFeatureEpicEstimatesWithAssetId(String assetId, String teamId, String projectId,
+			Optional<String> agileType, Optional<String> estimateMetricType);
+	/**
 	 * Retrieves estimate total of all features in the current sprint and for
 	 * the current team.
 	 * 
@@ -144,7 +156,23 @@ public interface FeatureService {
 	 */
 	DataResponse<SprintEstimate> getAggregatedSprintEstimates(ObjectId componentId,
 			String teamId, String projectId, Optional<String> agileType, Optional<String> estimateMetricType);
-	
+	/**
+	 * Retrieves estimate done of all features in the current sprint(s) for the current team
+	 * 
+	 * @param assetId
+	 *            Unique id for each Feature
+	 * @param teamId
+	 *            A given scope-owner's source-system ID
+	 * @param agileType
+	 * 			  Agile type to be retrieved (e.g., kanban | scrum)
+	 * @param estimateMetricType
+	 * 			  The reporting metric (hours | storypoints)
+	 * 
+	 * @return A data response list of type Feature containing the done estimate
+	 *         number for all features
+	 */
+	DataResponse<SprintEstimate> getAggregatedSprintEstimatesWithAssetId(String assetId,
+			String teamId, String projectId, Optional<String> agileType, Optional<String> estimateMetricType);
 	/**
 	 * Retrieves the current sprint's detail for a given team.
 	 * 
@@ -160,5 +188,21 @@ public interface FeatureService {
 	 *         sprint fields for the current team's sprint
 	 */
 	DataResponse<List<Feature>> getCurrentSprintDetail(ObjectId componentId,
+			String teamId, String projectId, Optional<String> agileType);
+	
+	/**
+	 * Retrieves the current sprint's detail for a given team.
+	 * 
+	 * @param assetId
+	 *            Unique id for each Feature
+	 * @param teamId
+	 *            A given scope-owner's source-system ID
+	 * @param agileType
+	 * 			  Agile type to be retrieved (e.g., kanban | scrum)
+	 * 
+	 * @return A data response list of type Feature containing several relevant
+	 *         sprint fields for the current team's sprint
+	 */
+	DataResponse<List<Feature>> getCurrentSprintDetailWithAssetId(String assetId,
 			String teamId, String projectId, Optional<String> agileType);
 }

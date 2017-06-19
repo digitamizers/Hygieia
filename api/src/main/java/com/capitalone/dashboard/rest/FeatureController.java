@@ -85,6 +85,23 @@ public class FeatureController {
 		ObjectId componentId = new ObjectId(cId);
 		return this.featureService.getCurrentSprintDetail(componentId, teamId, projectId, agileType);
 	}
+	
+	/**
+	 * REST endpoint for retrieving the current sprint detail for a team
+	 *
+	 * @param teamId
+	 *            A given scope-owner's source-system ID
+	 * @return A response list of type Feature containing the done estimate of
+	 *         current features
+	 */
+	@RequestMapping(value = "/iterationWithAssetId/{teamId}", method = GET, produces = APPLICATION_JSON_VALUE)
+	public DataResponse<List<Feature>> currentSprintDetailWithAssetId(
+	        @RequestParam(value = "projectId", required = true) String projectId,
+			@RequestParam(value = "agileType", required = false) Optional<String> agileType,
+			@RequestParam(value = "assetId", required = true) String assetId,
+			@PathVariable String teamId) {
+		return this.featureService.getCurrentSprintDetailWithAssetId(assetId, teamId, projectId, agileType);
+	}
 
 	/**
 	 * REST endpoint for retrieving only the unique super features for a given
@@ -108,6 +125,27 @@ public class FeatureController {
 	}
 	
 	/**
+	 * REST endpoint for retrieving only the unique super features for a given
+	 * team and sprint and their related estimates
+	 *
+	 * @param teamId
+	 *            A given scope-owner's source-system ID
+	 * @return A response list of type Feature containing the unique features
+	 *         plus their sub features' estimates associated to the current
+	 *         sprint and team
+	 */
+	@RequestMapping(value = "/feature/estimatesWithAssetId/super/{teamId}", method = GET, produces = APPLICATION_JSON_VALUE)
+	public DataResponse<List<Feature>> featureEpicsWithAssetId(
+	        @RequestParam(value = "projectId", required = true) String projectId,
+			@RequestParam(value = "agileType", required = false) Optional<String> agileType,
+			@RequestParam(value = "estimateMetricType", required = false) Optional<String> estimateMetricType,
+			@RequestParam(value = "assetId", required = true) String assetId,
+			@PathVariable String teamId) {
+		
+		return this.featureService.getFeatureEpicEstimatesWithAssetId(assetId, teamId, projectId, agileType, estimateMetricType);
+	}
+	
+	/**
 	 * REST endpoint for retrieving the current sprint estimates for a team
 	 *
 	 * @param teamId
@@ -123,6 +161,22 @@ public class FeatureController {
 			@PathVariable String teamId) {
 		ObjectId componentId = new ObjectId(cId);
 		return this.featureService.getAggregatedSprintEstimates(componentId, teamId, projectId, agileType, estimateMetricType);
+	}
+	/**
+	 * REST endpoint for retrieving the current sprint estimates for a team using assetId
+	 *
+	 * @param teamId
+	 *            A given scope-owner's source-system ID
+	 * @return 
+	 */
+	@RequestMapping(value = "/feature/estimates/aggregatedsprintsWithAssetId/{teamId}", method = GET, produces = APPLICATION_JSON_VALUE)
+	public DataResponse<SprintEstimate> featureAggregatedSprintEstimatesWithAssetId (
+	        @RequestParam(value = "projectId", required = true) String projectId,
+			@RequestParam(value = "agileType", required = false) Optional<String> agileType,
+			@RequestParam(value = "estimateMetricType", required = false) Optional<String> estimateMetricType,
+			@RequestParam(value = "assetId", required = true) String assetId,
+			@PathVariable String teamId) {
+		return this.featureService.getAggregatedSprintEstimatesWithAssetId(assetId, teamId, projectId, agileType, estimateMetricType);
 	}
 
 	/**

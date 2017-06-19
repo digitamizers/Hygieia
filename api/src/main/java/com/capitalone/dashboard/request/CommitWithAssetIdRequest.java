@@ -1,14 +1,13 @@
 package com.capitalone.dashboard.request;
 
-import org.bson.types.ObjectId;
-
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CommitRequest {
+import javax.validation.constraints.NotNull;
+
+public class CommitWithAssetIdRequest {
     @NotNull
-    private ObjectId componentId;
+    private String assetId;
     private Integer numberOfDays;
     private Long commitDateBegins;
     private Long commitDateEnds;
@@ -18,13 +17,14 @@ public class CommitRequest {
     private List<String> authors = new ArrayList<>();
     private String messageContains;
 
-    public ObjectId getComponentId() {
-        return componentId;
-    }
 
-    public void setComponentId(ObjectId componentId) {
-        this.componentId = componentId;
-    }
+    public String getAssetId() {
+		return assetId;
+	}
+
+	public void setAssetId(String assetId) {
+		this.assetId = assetId;
+	}
 
 	public Integer getNumberOfDays() {
         return numberOfDays;
