@@ -69,6 +69,8 @@ public class CodeQualityServiceImpl implements CodeQualityService {
 
         return searchType(request);
     }
+    
+    
 
     protected DataResponse<Iterable<CodeQuality>> emptyResponse() {
         return new DataResponse<>(null, System.currentTimeMillis());

@@ -43,5 +43,11 @@ public interface ScopeRepository extends CrudRepository<Scope, ObjectId>,
 	@Query(value = "{ 'collectorId' : ?0 }")
 	List<Scope> findByCollectorId(ObjectId collectorId);
 
+	@Query(value = "{ 'assetId' : ?0 }")
+	List<Scope> findByAssetId(String assetId);
+
 	Page<Scope> findAllByCollectorIdAndNameContainingIgnoreCase(ObjectId collectorId, String name, Pageable pageable);
+	
+	Page<Scope> findAllByAssetIdAndNameContainingIgnoreCase(String assetId, String name, Pageable pageable);
+	
 }

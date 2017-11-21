@@ -32,6 +32,7 @@ public class Build extends BaseModel {
     private BuildStatus buildStatus;
     private String startedBy;
     private String log;
+    private String assetId;
     private List<RepoBranch> codeRepos = new ArrayList<>();
     private List<SCM> sourceChangeSet = new ArrayList<>();
 
@@ -119,7 +120,15 @@ public class Build extends BaseModel {
         this.log = log;
     }
 
-    public List<SCM> getSourceChangeSet() {
+    public String getAssetId() {
+		return assetId;
+	}
+
+	public void setAssetId(String assetId) {
+		this.assetId = assetId;
+	}
+
+	public List<SCM> getSourceChangeSet() {
         return sourceChangeSet;
     }
 

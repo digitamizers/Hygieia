@@ -47,4 +47,18 @@ public interface ScopeService {
 	 */
 	Page<Scope> getScopeByCollectorWithFilter(ObjectId collectorId, String projectName, Pageable pageable);
 
+	/**
+	 * @param assetId
+	 * @return
+	 */
+	List<Scope> getScopesByAssetId(String assetId);
+	
+	
+	/**
+	 * @param assetId
+	 * @param projectName
+	 * @param pageable
+	 * @return
+	 */
+	 Page<Scope> getScopeByAssetWithFilter(String assetId, String projectName, Pageable pageable);
 }

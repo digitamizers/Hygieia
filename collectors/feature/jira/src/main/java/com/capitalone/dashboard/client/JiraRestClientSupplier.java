@@ -11,9 +11,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
@@ -43,7 +40,7 @@ public class JiraRestClientSupplier implements Supplier<JiraRestClient> {
 	public JiraRestClient get() {
 		JiraRestClient client = null;
 		
-		String jiraCredentials = featureSettings.getJiraCredentials();
+		//String jiraCredentials = featureSettings.getJiraCredentials();
 		String jiraBaseUrl = featureSettings.getJiraBaseUrl();
 		String proxyUri = null;
 		String proxyPort = null;
@@ -57,8 +54,8 @@ public class JiraRestClientSupplier implements Supplier<JiraRestClient> {
 				
 				jiraUri = this.createJiraConnection(jiraBaseUrl,
 						proxyUri + ":" + proxyPort, 
-						this.decodeCredentials(jiraCredentials).get("username"),
-						this.decodeCredentials(jiraCredentials).get("password"));
+						featureSettings.getUsername(),
+						featureSettings.getPassword());
 			} else {
 				jiraUri = new URI(jiraBaseUrl);
 			}
@@ -66,8 +63,8 @@ public class JiraRestClientSupplier implements Supplier<JiraRestClient> {
 			InetAddress.getByName(jiraUri.getHost());
 			client = new AsynchronousJiraRestClientFactory()
 					.createWithBasicHttpAuthentication(jiraUri, 
-							decodeCredentials(jiraCredentials).get("username"),
-							decodeCredentials(jiraCredentials).get("password"));
+							featureSettings.getUsername(),
+							featureSettings.getPassword());
 			
 		} catch (UnknownHostException | URISyntaxException e) {
 			LOGGER.error("The Jira host name is invalid. Further jira collection cannot proceed.");
@@ -90,7 +87,7 @@ public class JiraRestClientSupplier implements Supplier<JiraRestClient> {
 	 *            response (e.g., nothing gets decoded)
 	 * @return Decoded username/password map of strings
 	 */
-	private Map<String, String> decodeCredentials(String jiraBasicAuthCredentialsInBase64) {
+	/*private Map<String, String> decodeCredentials(String jiraBasicAuthCredentialsInBase64) {
 		Map<String, String> credMap = new LinkedHashMap<String, String>();
 		if (jiraBasicAuthCredentialsInBase64 != null) {
 				//the tokenize includes a \n to ensure we trim those off the end (mac base64 adds these!)
@@ -107,7 +104,7 @@ public class JiraRestClientSupplier implements Supplier<JiraRestClient> {
 		
 		return credMap;
 
-	}
+	}*/
 
 	/**
 	 * Generates an authenticated proxy connection URI and Jira URI for use in

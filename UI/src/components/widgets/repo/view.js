@@ -18,14 +18,8 @@
                     onClick: showDetail
                 }),
                 Chartist.plugins.axisLabels({
-                    stretchFactor: 1.4,
-                    axisX: {
-                        labels: [
-                            moment().subtract(14, 'days').format('MMM DD'),
-                            moment().subtract(7, 'days').format('MMM DD'),
-                            moment().format('MMM DD')
-                        ]
-                    }
+                	offset: 200
+                 
                 }),
                 Chartist.plugins.ctPointLabels({
                     textAnchor: 'middle'
@@ -54,7 +48,8 @@
             var deferred = $q.defer();
             var params = {
                 componentId: $scope.widgetConfig.componentId,
-                numberOfDays: 14
+                numberOfDays: 14,
+                assetId:'gitHubAssetId'
             };
 
             codeRepoData.details(params).then(function (data) {
@@ -326,7 +321,7 @@
           
         var issues = [];
         var groupedissueData = [];
-        function processIssueResponse(data, numberOfDays) {
+        function processIssueResponseByTime(data, numberOfDays) {
             groupedissueData = [];
             issues = [];
             // get total issues by day
@@ -426,5 +421,104 @@
                 return date;
             }
         }
+        function processResponse(data, numberOfDays) {
+            
+
+
+            // group get total counts and contributors
+            var today = toMidnight(new Date());
+            var sevenDays = toMidnight(new Date());
+            var fourteenDays = toMidnight(new Date());
+            sevenDays.setDate(sevenDays.getDate() - 7);
+            fourteenDays.setDate(fourteenDays.getDate() - 14);
+
+            var lastDayCount = 0;
+            var lastDayContributors = [];
+
+            var lastSevenDayCount = 0;
+            var lastSevenDaysContributors = [];
+
+            var lastFourteenDayCount = 0;
+            var lastFourteenDaysContributors = [];
+
+            // loop through and add to counts
+            _(data).forEach(function (commit) {
+
+                if (commit.scmCommitTimestamp >= today.getTime()) {
+                    lastDayCount++;
+
+                    if (lastDayContributors.indexOf(commit.scmAuthor) === -1) {
+                        lastDayContributors.push(commit.scmAuthor);
+                    }
+                }
+
+                if (commit.scmCommitTimestamp >= sevenDays.getTime()) {
+                    lastSevenDayCount++;
+
+                    if (lastSevenDaysContributors.indexOf(commit.scmAuthor) === -1) {
+                        lastSevenDaysContributors.push(commit.scmAuthor);
+                    }
+                }
+
+                if (commit.scmCommitTimestamp >= fourteenDays.getTime()) {
+                    lastFourteenDayCount++;
+                    ctrl.commits.push(commit);
+                    if (lastFourteenDaysContributors.indexOf(commit.scmAuthor) === -1) {
+                        lastFourteenDaysContributors.push(commit.scmAuthor);
+                    }
+                }
+
+            });
+
+            ctrl.lastDayCommitCount = lastDayCount;
+            ctrl.lastDayContributorCount = lastDayContributors.length;
+            ctrl.lastSevenDaysCommitCount = lastSevenDayCount;
+            ctrl.lastSevenDaysContributorCount = lastSevenDaysContributors.length;
+            ctrl.lastFourteenDaysCommitCount = lastFourteenDayCount;
+            ctrl.lastFourteenDaysContributorCount = lastFourteenDaysContributors.length;
+
+
+            function toMidnight(date) {
+                date.setHours(0, 0, 0, 0);
+                return date;
+            }
+            // get total commits by Author
+            var commits = [];
+            var groups = _(data).sortBy('scmAuthor')
+                .groupBy(function (item) {
+                    return item.scmAuthor;
+                }).value();
+
+var labels = [];
+            for (var x = 0; x <lastFourteenDaysContributors.length; x++) {
+            	if (Object.values(groups)[x].length) {
+                    commits.push(Object.values(groups)[x].length);
+                    labels.push(Object.keys(groups)[x]);
+                    groupedCommitData.push(Object.values(groups)[x]);
+                }
+                else {
+                    commits.push(0);
+                    groupedCommitData.push([]);
+                }
+            }
+
+            //update charts
+            if (groupedCommitData.length) {
+               
+   
+                _(groupedCommitData).forEach(function (c) {
+                    labels.push(c.scmAuthor);
+                });
+
+                ctrl.commitChartData = {
+                    series: [commits],
+                    labels: labels
+                    
+                };
+                ctrl.commitChartOptions.axisX.labels = lastFourteenDaysContributors;
+            }
+        }
+
+    
     }
 })();

@@ -1,5 +1,30 @@
 package com.capitalone.dashboard.collector;
 
+import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.bson.types.ObjectId;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.scheduling.TaskScheduler;
+
+import com.capitalone.dashboard.integration.VaultIntegrationAPI;
 import com.capitalone.dashboard.model.BaseModel;
 import com.capitalone.dashboard.model.Build;
 import com.capitalone.dashboard.model.Component;
@@ -10,29 +35,6 @@ import com.capitalone.dashboard.repository.ComponentRepository;
 import com.capitalone.dashboard.repository.HudsonCollectorRepository;
 import com.capitalone.dashboard.repository.HudsonJobRepository;
 import com.google.common.collect.Sets;
-import org.bson.types.ObjectId;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.scheduling.TaskScheduler;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HudsonCollectorTaskTests {
@@ -51,7 +53,7 @@ public class HudsonCollectorTaskTests {
     private HudsonSettings hudsonSettings;
     @Mock
     private ComponentRepository dbComponentRepository;
-
+    @Mock private VaultIntegrationAPI vaultIntegrationAPI;
     @InjectMocks
     private HudsonCollectorTask task;
 

@@ -53,6 +53,10 @@ public class FeatureSettings {
 	private String jiraOauthExpiretime;
 	private String jiraProxyUrl;
 	private String jiraProxyPort;
+	private String assetId;
+	private String orgId;
+	private String username;
+	private String password;
 	/**
 	 * In Jira, general IssueType IDs are associated to various "issue"
 	 * attributes. However, there is one attribute which this collector's
@@ -339,5 +343,37 @@ public class FeatureSettings {
 
 	public void setJiraBoardAsTeam(String jiraBoardAsTeam) {
 		this.jiraBoardAsTeam = jiraBoardAsTeam;
+	}
+
+	public String getAssetId() {
+		return assetId;
+	}
+
+	public void setAssetId(String assetId) {
+		this.assetId = assetId;
+	}
+
+	public String getOrgId() {
+		return orgId;
+	}
+
+	public void setOrgId(String orgId) {
+		this.orgId = orgId;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
 	}
 }

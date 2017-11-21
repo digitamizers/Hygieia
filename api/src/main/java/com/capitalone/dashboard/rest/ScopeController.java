@@ -67,7 +67,12 @@ public class ScopeController {
 		return this.scopeService.getScopesByCollector(new ObjectId(collectorId));
 	}
 
-
+	@RequestMapping(value = "/scopeasset/{collectorId}", method = GET, produces = APPLICATION_JSON_VALUE)
+	public List<Scope> teamsByAssetId(
+			@PathVariable String assetId) {
+		return this.scopeService.getScopesByAssetId(assetId);
+	}
+	
 	/**
 	 * REST endpoint for retrieving all features for a given sprint and team
 	 * (the sprint is derived)
@@ -89,6 +94,22 @@ public class ScopeController {
 	public ResponseEntity<List<Scope>> teamsByCollectorPage(
 			@PathVariable String collectorId,@RequestParam(value = "search", required = false, defaultValue = "") String descriptionFilter, @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable) {
 		Page<Scope> pageOfScopeItems = scopeService.getScopeByCollectorWithFilter(new ObjectId(collectorId),descriptionFilter,pageable);
+		return ResponseEntity
+				.ok()
+				.headers(paginationHeaderUtility.buildPaginationHeaders(pageOfScopeItems))
+				.body(pageOfScopeItems.getContent());
+	}
+	
+	/**
+	 *
+	 * @param collectorId, search criteria, pageable
+	 *
+	 * @return List of scope
+	 */
+	@RequestMapping(value = "/scopeasset/page/{assetId}", method = GET, produces = APPLICATION_JSON_VALUE)
+	public ResponseEntity<List<Scope>> teamsByAssetIdPage(
+			@PathVariable String assetId,@RequestParam(value = "search", required = false, defaultValue = "") String descriptionFilter, @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable) {
+		Page<Scope> pageOfScopeItems = scopeService.getScopeByAssetWithFilter(assetId,descriptionFilter,pageable);
 		return ResponseEntity
 				.ok()
 				.headers(paginationHeaderUtility.buildPaginationHeaders(pageOfScopeItems))

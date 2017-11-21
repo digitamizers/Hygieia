@@ -62,6 +62,34 @@ public class TeamServiceImpl implements TeamService {
 
         return teams;
     }
+    
+    /**
+     * Retrieves the scope information for a given scope source system ID
+     *
+     * @param collectorId
+     *
+     * @return teams
+     */
+    @Override
+    public List<Team>  getTeamsByAssetId(String assetId) {
+        List<Team> teams = teamRepository.findByAssetId(assetId);
+
+        return teams;
+    }
+    
+    /**
+     * Retrieves the team information for a given collectorId, teamName, pageable
+     *
+     * @param collectorId, teamName, pageable
+     *
+     * @return teams
+     */
+    @Override
+    public Page<Team> getTeamByAssetIdWithFilter(String assetId, String teamName, Pageable pageable) {
+        Page<Team> teams = teamRepository.findAllByAssetIdAndNameContainingIgnoreCase(assetId,teamName,pageable);
+        return teams;
+    }
+
 
     /**
      * Retrieves the scope information for a given scope source system ID

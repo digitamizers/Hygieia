@@ -8,13 +8,16 @@
 
 	function featureData($http) {
 		var testAggregateSprintEstimates = 'test-data/feature-aggregate-sprint-estimates.json';
-		var buildAggregateSprintEstimates = '/api/feature/estimates/aggregatedsprints';
+		var buildAggregateSprintEstimates = '/api/feature/estimates/aggregatedsprintsWithAssetId/';
 
+		var assetIdParam = "&assetId=";
+		var orgIdParam = "&orgId=";
+		
 		var testFeatureWip = 'test-data/feature-super.json';
 		var buildFeatureWip = '/api/feature/estimates/super';
 
 		var testSprint = 'test-data/feature-iteration.json';
-		var buildSprint = '/api/iteration';
+		var buildSprint = '/api/iterationWithAssetId';
 
 		var testProjectsRoute = 'test-data/projects.json';
         var buildProjectsRoute = '/api/scope';
@@ -47,7 +50,9 @@
 					projectId: filterProjectId,
 					teamId: filterTeamId,
 					agileType: agileType,
-					estimateMetricType: estimateMetricType
+					estimateMetricType: estimateMetricType,
+					assetIdParam:"abd123",
+					orgIdParam:"org1"
 				};
 
 			return $http.get(HygieiaConfig.local ? testAggregateSprintEstimates : buildAggregateSprintEstimates, {params: params})
@@ -87,7 +92,9 @@
 			var params = {component: componentId,
 					projectId: filterProjectId,
 					teamId: filterTeamId,
-					agileType: agileType
+					agileType: agileType,
+					assetIdParam:"abd123",
+					orgIdParam:"org1"
 				};
 
 			return $http.get(HygieiaConfig.local ? testSprint : buildSprint, {params: params})

@@ -27,6 +27,12 @@ public interface FeatureService {
 	 */
 	DataResponse<List<Feature>> getRelevantStories(ObjectId componentId,
 			String teamId, String projectId, Optional<String> agileType);
+	DataResponse<List<Feature>> getFeatureEpicEstimatesWithAssetId(String assetId,String orgId, String teamId, String projectId,
+ 			Optional<String> agileType, Optional<String> estimateMetricType);
+DataResponse<SprintEstimate> getAggregatedSprintEstimatesWithAssetId(String assetId, String orgId,
+ 			String teamId, String projectId, Optional<String> agileType, Optional<String> estimateMetricType);
+DataResponse<List<Feature>> getCurrentSprintDetailWithAssetId(String assetId, String orgId,
+ 			String teamId, String projectId, Optional<String> agileType);
 
 	/**
 	 * Retrieves a single story based on a back-end story number

@@ -15,5 +15,6 @@ public interface CodeQualityService {
      * @return quality data matching criteria
      */
     DataResponse<Iterable<CodeQuality>> search(CodeQualityRequest request);
+    DataResponse<Iterable<CodeQuality>> searchType(CodeQualityRequest request);
     String create(CodeQualityCreateRequest request) throws HygieiaException;
 }

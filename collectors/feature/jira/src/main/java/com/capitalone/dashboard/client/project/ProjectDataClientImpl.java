@@ -115,6 +115,9 @@ public class ProjectDataClientImpl implements ProjectDataClient {
 				// assetState - does not exist for jira
 				scope.setAssetState("Active");
 
+				scope.setAssetId(featureSettings.getAssetId());
+				scope.setOrgId(featureSettings.getOrgId());
+				
 				// isDeleted - does not exist for jira
 				scope.setIsDeleted("False");
 

@@ -232,6 +232,8 @@ public class StoryDataClientImpl implements StoryDataClient {
 					
 					// ID
 					feature.setsId(TOOLS.sanitizeResponse(issue.getId()));
+					feature.setAssetId(featureSettings.getAssetId());
+					feature.setOrgId(featureSettings.getOrgId());
 					
 					// Type
 					feature.setsTypeId(TOOLS.sanitizeResponse(issueType.getId()));

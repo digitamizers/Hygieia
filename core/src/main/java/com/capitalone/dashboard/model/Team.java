@@ -20,6 +20,7 @@ public class Team extends BaseModel {
     private String isDeleted;
     private boolean enabled;
     private String teamType;
+    private String assetId;
 
     @Transient
     private Collector collector;
@@ -101,7 +102,15 @@ public class Team extends BaseModel {
         this.teamType = teamType;
     }
 
-    /* (non-Javadoc)
+    public String getAssetId() {
+		return assetId;
+	}
+
+	public void setAssetId(String assetId) {
+		this.assetId = assetId;
+	}
+
+	/* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
     @Override

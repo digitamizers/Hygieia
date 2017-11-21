@@ -10,7 +10,7 @@
 
     function codeRepoData($http) {
         var testDetailRoute = 'test-data/commit_detail.json';
-        var caDetailRoute = '/api/commit';
+        var caDetailRoute = '/api/commitWithAssetId';
 
         return {
             details: details

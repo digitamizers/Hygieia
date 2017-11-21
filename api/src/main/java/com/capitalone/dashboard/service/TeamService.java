@@ -15,6 +15,8 @@ public interface TeamService {
      * @return A data response list of type Scope containing all unique scopes
      */
     Iterable<Team> getAllTeams();
+    
+    List<Team>  getTeamsByAssetId(String assetId);
 
     /**
      * Retrieves the scope information for a given scope source system ID
@@ -40,5 +42,5 @@ public interface TeamService {
      * @return team items matching the specified name
      */
     Page<Team> getTeamByCollectorWithFilter(ObjectId collectorId, String teamName, Pageable pageable);
-
+    Page<Team> getTeamByAssetIdWithFilter(String assetId, String teamName, Pageable pageable);
 }

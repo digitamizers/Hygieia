@@ -1,5 +1,25 @@
 package com.capitalone.dashboard.service;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TimeZone;
+
+import javax.xml.bind.DatatypeConverter;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+
 import com.capitalone.dashboard.model.Collector;
 import com.capitalone.dashboard.model.CollectorItem;
 import com.capitalone.dashboard.model.CollectorType;
@@ -13,24 +33,6 @@ import com.capitalone.dashboard.repository.ComponentRepository;
 import com.capitalone.dashboard.repository.FeatureRepository;
 import com.capitalone.dashboard.util.FeatureCollectorConstants;
 import com.mysema.query.BooleanBuilder;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
-
-import javax.xml.bind.DatatypeConverter;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.TimeZone;
 
 /**
  * The feature service.
@@ -505,4 +507,130 @@ public class FeatureServiceImpl implements FeatureService {
 		
 		return rt;
 	}
+	
+	private List<Feature> getFeaturesForCurrentSprintsWithAssetId(String teamId, String projectId, String assetId, String orgId, String agileType, boolean minimal) {
+ 		List<Feature> rt = new ArrayList<Feature>();
+ 	
+ 		String now = getCurrentISODateTime();
+ 		
+ 		   rt.addAll(featureRepository.findByNullSprintsWithAssetId(teamId, projectId, assetId, minimal));
+ 		    rt.addAll(featureRepository.findByUnendingSprintsWithAssetId(teamId, projectId, assetId, minimal));
+ 			// default to scrum
+ 			/*
+ 			 * A feature is part of a scrum sprint if any of the following are true:
+ 			 *   - the feature has a sprint set that has start <= now <= end and end < EOT (9999-12-31T59:59:59.999999)
+ 			 */
+ 		    rt.addAll(featureRepository.findByActiveEndingSprintsWithAssetId(teamId, projectId, assetId, orgId,now, minimal));
+ 		
+ 		
+ 		return rt;
+ 	}
+
+@Override
+	public DataResponse<List<Feature>> getFeatureEpicEstimatesWithAssetId(String assetId,String orgId, String teamId, String projectId,
+			Optional<String> agileType, Optional<String> estimateMetricType) {
+		
+		List<Feature> relevantFeatureEstimates = getFeaturesForCurrentSprintsWithAssetId(teamId, projectId, assetId, orgId,agileType.isPresent()? agileType.get() : null, true);
+		
+		// epicID : epic information (in the form of a Feature object)
+		Map<String, Feature> epicIDToEpicFeatureMap = new HashMap<>();
+		
+		for (Feature tempRs : relevantFeatureEstimates) {
+			String epicID = tempRs.getsEpicID();
+			
+			if (StringUtils.isEmpty(epicID))
+				continue;
+			
+			Feature feature = epicIDToEpicFeatureMap.get(epicID);
+			if (feature == null) {
+				feature = new Feature();
+				feature.setId(null);
+				feature.setsEpicID(epicID);
+				feature.setsEpicNumber(tempRs.getsEpicNumber());
+				feature.setsEpicUrl(tempRs.getsEpicUrl());
+				feature.setsEpicName(tempRs.getsEpicName());
+				feature.setsEstimate("0");
+				epicIDToEpicFeatureMap.put(epicID, feature);
+			}
+			
+			// if estimateMetricType is hours accumulate time estimate in minutes for better precision ... divide by 60 later
+			int estimate = getEstimate(tempRs, estimateMetricType);
+			
+			feature.setsEstimate(String.valueOf(Integer.valueOf(feature.getsEstimate()) + estimate));
+		}
+		
+		if (isEstimateTime(estimateMetricType)) {
+			// time estimate is in minutes but we want to return in hours
+			for (Feature f : epicIDToEpicFeatureMap.values()) {
+				f.setsEstimate(String.valueOf(Integer.valueOf(f.getsEstimate()) / 60));
+			}
+		}
+		
+		return new DataResponse<>(new ArrayList<>(epicIDToEpicFeatureMap.values()), new Date().getTime());
+	}
+
+@Override
+public DataResponse<SprintEstimate> getAggregatedSprintEstimatesWithAssetId(String assetId, String orgId,String teamId,
+		String projectId, Optional<String> agileType, Optional<String> estimateMetricType) {
+	SprintEstimate estimate = getSprintEstimatesWithAssetId(teamId, projectId, assetId, orgId,agileType, estimateMetricType);
+	 		return new DataResponse<>(estimate, new Date().getTime());
+}
+
+@SuppressWarnings("PMD.NPathComplexity")
+ 	private SprintEstimate getSprintEstimatesWithAssetId(String teamId, String projectId, String assetId, String orgId,Optional<String> agileType, Optional<String> estimateMetricType) {
+ 		List<Feature> storyEstimates = getFeaturesForCurrentSprintsWithAssetId(teamId, projectId, assetId, orgId, agileType.isPresent()? agileType.get() : null, true);
+ 
+ 		int totalEstimate = 0;
+ 		int wipEstimate = 0;
+ 		int doneEstimate = 0;
+ 		
+ 		for (Feature tempRs : storyEstimates) {
+ 			String tempStatus = tempRs.getsStatus() != null? tempRs.getsStatus().toLowerCase() : null;
+ 
+ 			// if estimateMetricType is hours accumulate time estimate in minutes for better precision ... divide by 60 later
+ 			int estimate = getEstimate(tempRs, estimateMetricType);
+ 			
+ 			totalEstimate += estimate;
+ 		if (tempStatus != null) {
+ 				switch (tempStatus) {
+ 					case "in progress":
+ 					case "waiting":
+ 					case "impeded":
+ 						wipEstimate += estimate;
+ 					break;
+ 					case "done":
+ 					case "accepted":
+ 						doneEstimate += estimate;
+ 					break;
+ 				}
+ 			}
+ 		}
+ 		
+ 
+ 		int openEstimate = totalEstimate - wipEstimate - doneEstimate;
+ 		
+ 		if (isEstimateTime(estimateMetricType)) {
+ 			// time estimate is in minutes but we want to return in hours
+ 			totalEstimate /= 60;
+ 			openEstimate /= 60;
+ 			wipEstimate /= 60;
+ 			doneEstimate /= 60;
+ 		}
+ 		
+ 		SprintEstimate response = new SprintEstimate();
+ 		response.setOpenEstimate(openEstimate);
+ 		response.setInProgressEstimate(wipEstimate);
+ 		response.setCompleteEstimate(doneEstimate);
+ 		response.setTotalEstimate(totalEstimate);
+ 
+ 		return response;
+ 	}
+
+@Override
+public DataResponse<List<Feature>> getCurrentSprintDetailWithAssetId(String assetId,String orgId, String teamId,
+		String projectId, Optional<String> agileType) {
+	List<Feature> sprintResponse = getFeaturesForCurrentSprintsWithAssetId(teamId, projectId, assetId, orgId,agileType.isPresent()? agileType.get() : null, true);
+	 
+			return new DataResponse<>(sprintResponse,new Date().getTime());
+}
 }

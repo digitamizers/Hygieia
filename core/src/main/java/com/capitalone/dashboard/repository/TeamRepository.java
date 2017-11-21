@@ -38,4 +38,9 @@ public interface TeamRepository extends CrudRepository<Team, ObjectId>,
     List<Team> findByCollectorId(ObjectId collectorId);
 
     Page<Team> findAllByCollectorIdAndNameContainingIgnoreCase(ObjectId collectorId, String name, Pageable pageable);
+    @Query(value = "{ 'assetId' : ?0 }")
+    List<Team> findByAssetId(String assetId);
+
+    
+    Page<Team> findAllByAssetIdAndNameContainingIgnoreCase(String assetId, String name, Pageable pageable);
 }

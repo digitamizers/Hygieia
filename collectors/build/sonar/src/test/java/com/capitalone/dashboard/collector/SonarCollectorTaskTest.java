@@ -1,11 +1,13 @@
 package com.capitalone.dashboard.collector;
 
-import com.capitalone.dashboard.model.Component;
-import com.capitalone.dashboard.model.SonarCollector;
-import com.capitalone.dashboard.repository.CodeQualityRepository;
-import com.capitalone.dashboard.repository.ComponentRepository;
-import com.capitalone.dashboard.repository.SonarCollectorRepository;
-import com.capitalone.dashboard.repository.SonarProjectRepository;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+
 import org.bson.types.ObjectId;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,13 +15,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
+import com.capitalone.dashboard.integration.VaultIntegrationAPI;
+import com.capitalone.dashboard.model.Component;
+import com.capitalone.dashboard.model.SonarCollector;
+import com.capitalone.dashboard.repository.CodeQualityRepository;
+import com.capitalone.dashboard.repository.ComponentRepository;
+import com.capitalone.dashboard.repository.SonarCollectorRepository;
+import com.capitalone.dashboard.repository.SonarProjectRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SonarCollectorTaskTest {
@@ -34,7 +36,7 @@ public class SonarCollectorTaskTest {
     @Mock private SonarClientSelector sonarClientSelector;
     @Mock private DefaultSonarClient defaultSonarClient;
     @Mock private DefaultSonar6Client defaultSonar6Client;
-
+    @Mock private VaultIntegrationAPI vaultIntegrationAPI;
     private static final String SERVER1 = "server1";
     private static final String SERVER2 = "server2";
     private static final String METRICS1 = "nloc";

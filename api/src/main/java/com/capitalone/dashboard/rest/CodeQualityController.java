@@ -46,7 +46,7 @@ public class CodeQualityController {
     @RequestMapping(value = "/quality/static-analysis", method = GET, produces = APPLICATION_JSON_VALUE)
     public DataResponse<Iterable<CodeQuality>> qualityStaticAnalysis(@Valid CodeQualityRequest request) {
         request.setType(CodeQualityType.StaticAnalysis);
-        return codeQualityService.search(request);
+        return codeQualityService.searchType(request);
     }
 
     @RequestMapping(value = "/quality/static-analysis", method = POST,
@@ -61,6 +61,6 @@ public class CodeQualityController {
     @RequestMapping(value = "/quality/security-analysis", method = GET, produces = APPLICATION_JSON_VALUE)
     public DataResponse<Iterable<CodeQuality>> qualitySecurityAnalysis(@Valid CodeQualityRequest request) {
         request.setType(CodeQualityType.SecurityAnalysis);
-        return codeQualityService.search(request);
+        return codeQualityService.searchType(request);
     }
 }

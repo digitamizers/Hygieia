@@ -42,4 +42,7 @@ public interface FeatureRepositoryCustom {
      */
     List<Feature> findByNullSprints(String sTeamId, String sProjectId, ObjectId collectorId, boolean minimal);
     
+    List<Feature> findByUnendingSprintsWithAssetId(String sTeamId, String sProjectId, String assetId, boolean minimal);
+    List<Feature> findByNullSprintsWithAssetId(String sTeamId, String sProjectId, String assetId, boolean minimal);
+    List<Feature> findByActiveEndingSprintsWithAssetId(String sTeamId, String sProjectId, String assetId,String orgId, String currentISODateTime, boolean minimal);
 }

@@ -1,5 +1,25 @@
 package com.capitalone.dashboard.collector;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
+
+import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.bson.types.ObjectId;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import com.capitalone.dashboard.integration.VaultIntegrationAPI;
 import com.capitalone.dashboard.misc.HygieiaException;
 import com.capitalone.dashboard.model.CollectionError;
 import com.capitalone.dashboard.model.Collector;
@@ -15,24 +35,6 @@ import com.capitalone.dashboard.repository.CommitRepository;
 import com.capitalone.dashboard.repository.ComponentRepository;
 import com.capitalone.dashboard.repository.GitHubRepoRepository;
 import com.capitalone.dashboard.repository.GitRequestRepository;
-import org.bson.types.ObjectId;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GitHubCollectorTaskTest {
@@ -50,6 +52,8 @@ public class GitHubCollectorTaskTest {
 
     @Mock private Commit commit;
     @Mock private GitRequest gitRequest;
+    
+    @Mock private VaultIntegrationAPI vaultIntegrationAPI;
 
     @InjectMocks private GitHubCollectorTask task;
 

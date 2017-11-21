@@ -1,6 +1,23 @@
 package com.capitalone.dashboard.collector;
 
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
+import org.bson.types.ObjectId;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.client.RestClientException;
+
+import com.capitalone.dashboard.integration.VaultIntegrationAPI;
 import com.capitalone.dashboard.model.BaseModel;
 import com.capitalone.dashboard.model.Build;
 import com.capitalone.dashboard.model.CollItemCfgHist;
@@ -15,20 +32,6 @@ import com.capitalone.dashboard.repository.ComponentRepository;
 import com.capitalone.dashboard.repository.HudsonCollectorRepository;
 import com.capitalone.dashboard.repository.HudsonJobRepository;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang3.StringUtils;
-import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-import org.springframework.web.client.RestClientException;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 
 /**
@@ -46,6 +49,7 @@ public class HudsonCollectorTask extends CollectorTask<HudsonCollector> {
     private final HudsonClient hudsonClient;
     private final HudsonSettings hudsonSettings;
     private final ComponentRepository dbComponentRepository;
+    private final VaultIntegrationAPI vaultIntegrationAPI;
 
     @Autowired
     public HudsonCollectorTask(TaskScheduler taskScheduler,
@@ -53,7 +57,8 @@ public class HudsonCollectorTask extends CollectorTask<HudsonCollector> {
                                HudsonJobRepository hudsonJobRepository,
                                BuildRepository buildRepository, CollItemCfgHistRepository configRepository, HudsonClient hudsonClient,
                                HudsonSettings hudsonSettings,
-                               ComponentRepository dbComponentRepository) {
+                               ComponentRepository dbComponentRepository,
+                               VaultIntegrationAPI vaultIntegrationAPI) {
         super(taskScheduler, "Hudson");
         this.hudsonCollectorRepository = hudsonCollectorRepository;
         this.hudsonJobRepository = hudsonJobRepository;
@@ -62,6 +67,7 @@ public class HudsonCollectorTask extends CollectorTask<HudsonCollector> {
         this.hudsonClient = hudsonClient;
         this.hudsonSettings = hudsonSettings;
         this.dbComponentRepository = dbComponentRepository;
+        this.vaultIntegrationAPI = vaultIntegrationAPI;
     }
 
     @Override
@@ -355,4 +361,22 @@ public class HudsonCollectorTask extends CollectorTask<HudsonCollector> {
         return configRepository.findByCollectorItemIdAndJobAndTimestamp(job.getId(),
                 config.getJob(), config.getTimestamp()) == null;
     }
+    
+    private void setCredentials()
+   	{
+   		
+   		JSONObject response=vaultIntegrationAPI.getDetailsFromVault(hudsonSettings.getAssetId(), hudsonSettings.getAssetId());
+   		if(response!=null && response.has("username"))
+   		{
+   			List<String> usernames = new ArrayList<String>();
+   			usernames.add(response.getString("username"));
+   			List<String> apiKeys = new ArrayList<String>();
+   			apiKeys.add(response.getString("apiKeys"));
+   			
+   			hudsonSettings.setUsernames(usernames);
+   			hudsonSettings.setApiKeys(apiKeys);
+   			
+   			
+   		}
+   	}
 }

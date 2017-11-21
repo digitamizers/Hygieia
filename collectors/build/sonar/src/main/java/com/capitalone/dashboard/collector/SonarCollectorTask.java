@@ -1,5 +1,20 @@
 package com.capitalone.dashboard.collector;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.bson.types.ObjectId;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.stereotype.Component;
+
+import com.capitalone.dashboard.integration.VaultIntegrationAPI;
 import com.capitalone.dashboard.model.CodeQuality;
 import com.capitalone.dashboard.model.CollectorItem;
 import com.capitalone.dashboard.model.CollectorType;
@@ -10,18 +25,6 @@ import com.capitalone.dashboard.repository.CodeQualityRepository;
 import com.capitalone.dashboard.repository.ComponentRepository;
 import com.capitalone.dashboard.repository.SonarCollectorRepository;
 import com.capitalone.dashboard.repository.SonarProjectRepository;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 @Component
 public class SonarCollectorTask extends CollectorTask<SonarCollector> {
@@ -34,7 +37,7 @@ public class SonarCollectorTask extends CollectorTask<SonarCollector> {
     private final SonarClientSelector sonarClientSelector;
     private final SonarSettings sonarSettings;
     private final ComponentRepository dbComponentRepository;
-
+private final VaultIntegrationAPI vaultIntegrationAPI;
     @Autowired
     public SonarCollectorTask(TaskScheduler taskScheduler,
                               SonarCollectorRepository sonarCollectorRepository,
@@ -42,7 +45,8 @@ public class SonarCollectorTask extends CollectorTask<SonarCollector> {
                               CodeQualityRepository codeQualityRepository,
                               SonarSettings sonarSettings,
                               SonarClientSelector sonarClientSelector,
-                              ComponentRepository dbComponentRepository) {
+                              ComponentRepository dbComponentRepository,
+                              VaultIntegrationAPI vaultIntegrationAPI) {
         super(taskScheduler, "Sonar");
         this.sonarCollectorRepository = sonarCollectorRepository;
         this.sonarProjectRepository = sonarProjectRepository;
@@ -50,6 +54,7 @@ public class SonarCollectorTask extends CollectorTask<SonarCollector> {
         this.sonarSettings = sonarSettings;
         this.sonarClientSelector = sonarClientSelector;
         this.dbComponentRepository = dbComponentRepository;
+        this.vaultIntegrationAPI = vaultIntegrationAPI;
     }
 
     @Override
@@ -75,6 +80,7 @@ public class SonarCollectorTask extends CollectorTask<SonarCollector> {
         udId.add(collector.getId());
         List<SonarProject> existingProjects = sonarProjectRepository.findByCollectorIdIn(udId);
         List<SonarProject> latestProjects = new ArrayList<>();
+        setCredentials();
         clean(collector, existingProjects);
 
         if (!CollectionUtils.isEmpty(collector.getSonarServers())) {
@@ -170,6 +176,7 @@ public class SonarCollectorTask extends CollectorTask<SonarCollector> {
             CodeQuality codeQuality = sonarClient.currentCodeQuality(project, metrics);
             if (codeQuality != null && isNewQualityData(project, codeQuality)) {
                 codeQuality.setCollectorItemId(project.getId());
+                codeQuality.setAssetId(sonarSettings.getAssetId());
                 codeQualityRepository.save(codeQuality);
                 count++;
             }
@@ -188,7 +195,8 @@ public class SonarCollectorTask extends CollectorTask<SonarCollector> {
         for (SonarProject project : projects) {
             if (!existingProjects.contains(project)) {
                 project.setCollectorId(collector.getId());
-                project.setEnabled(false);
+                //project.setEnabled(false);
+                project.setEnabled(true);//Enabling all the projects
                 project.setDescription(project.getProjectName());
                 newProjects.add(project);
                 count++;
@@ -211,4 +219,17 @@ public class SonarCollectorTask extends CollectorTask<SonarCollector> {
         return codeQualityRepository.findByCollectorItemIdAndTimestamp(
                 project.getId(), codeQuality.getTimestamp()) == null;
     }
+    
+    private void setCredentials()
+   	{
+   		
+   		JSONObject response=vaultIntegrationAPI.getDetailsFromVault(sonarSettings.getAssetId(), sonarSettings.getAssetId());
+   		if(response!=null && response.has("username"))
+   		{
+   			sonarSettings.setUsername(response.getString("username"));
+   			sonarSettings.setPassword(response.getString("password"));
+   			
+   			
+   		}
+   	}
 }

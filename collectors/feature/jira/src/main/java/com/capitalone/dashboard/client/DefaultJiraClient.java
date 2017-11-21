@@ -1,12 +1,12 @@
 package com.capitalone.dashboard.client;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.IOException;
 import java.net.Authenticator;
-import java.net.InetSocketAddress;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
 import java.net.Proxy;
@@ -24,7 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.codec.binary.Base64;
+
 import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -68,7 +68,7 @@ public class DefaultJiraClient implements JiraClient {
 	
 	private static final Set<String> DEFAULT_FIELDS = new HashSet<>();
 	static {
-		DEFAULT_FIELDS.add("*all,-comment,-watches,-worklog,-votes,-reporter,-creator,-attachment");
+		DEFAULT_FIELDS.add("*all,-comment,-watches,-worklog,-votes,-reporter,-creator,-attachment,--sprint");
 	}
 	
 	private final FeatureSettings featureSettings;
@@ -175,9 +175,9 @@ public class DefaultJiraClient implements JiraClient {
 				connection = url.openConnection(proxy);
 
 				if (!StringUtils.isEmpty(featureSettings.getJiraCredentials())) {
-					String[] creds = (new String(Base64.decodeBase64(featureSettings.getJiraCredentials()))).split(":");
-					final String uname = creds[0];
-					final String pword = creds.length > 1? creds[1] : null;
+					//String[] creds = (new String(Base64.decodeBase64(featureSettings.getJiraCredentials()))).split(":");
+					final String uname = featureSettings.getUsername();
+					final String pword = featureSettings.getPassword();
 					Authenticator.setDefault(new Authenticator() {
 						protected PasswordAuthentication getPasswordAuthentication() {
 							return new PasswordAuthentication(uname, pword.toCharArray());
@@ -263,9 +263,9 @@ public class DefaultJiraClient implements JiraClient {
 				connection = url.openConnection(proxy);
 
 				if (!StringUtils.isEmpty(featureSettings.getJiraCredentials())) {
-					String[] creds = (new String(Base64.decodeBase64(featureSettings.getJiraCredentials()))).split(":");
-					final String uname = creds[0];
-					final String pword = creds.length > 1? creds[1] : null;
+					final String uname = featureSettings.getUsername();
+					final String pword = featureSettings.getPassword();
+					
 					Authenticator.setDefault(new Authenticator() {
 						protected PasswordAuthentication getPasswordAuthentication() {
 							return new PasswordAuthentication(uname, pword.toCharArray());
@@ -421,9 +421,9 @@ public class DefaultJiraClient implements JiraClient {
 				connection = url.openConnection(proxy);
 
 				if (!StringUtils.isEmpty(featureSettings.getJiraCredentials())) {
-					String[] creds = (new String(Base64.decodeBase64(featureSettings.getJiraCredentials()))).split(":");
-					final String uname = creds[0];
-					final String pword = creds.length > 1? creds[1] : null;
+					//String[] creds = (new String(Base64.decodeBase64(featureSettings.getJiraCredentials()))).split(":");
+					final String uname = featureSettings.getUsername();
+					final String pword = featureSettings.getPassword();
 					Authenticator.setDefault(new Authenticator() {
 						protected PasswordAuthentication getPasswordAuthentication() {
 							return new PasswordAuthentication(uname, pword.toCharArray());

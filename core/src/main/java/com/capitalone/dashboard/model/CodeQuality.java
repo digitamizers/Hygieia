@@ -28,6 +28,7 @@ public class CodeQuality extends BaseModel {
     private CodeQualityType type;
     private String version;
     private  ObjectId buildId;
+    private String assetId;
 
     private Set<CodeQualityMetric> metrics = new HashSet<>();
 
@@ -94,4 +95,12 @@ public class CodeQuality extends BaseModel {
     public void addMetric(CodeQualityMetric metric) {
         this.metrics.add(metric);
     }
+
+	public String getAssetId() {
+		return assetId;
+	}
+
+	public void setAssetId(String assetId) {
+		this.assetId = assetId;
+	}
 }

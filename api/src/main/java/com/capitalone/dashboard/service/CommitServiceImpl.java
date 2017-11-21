@@ -1,5 +1,22 @@
 package com.capitalone.dashboard.service;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import com.capitalone.dashboard.misc.HygieiaException;
 import com.capitalone.dashboard.model.Collector;
 import com.capitalone.dashboard.model.CollectorItem;
@@ -12,24 +29,8 @@ import com.capitalone.dashboard.repository.CollectorRepository;
 import com.capitalone.dashboard.repository.CommitRepository;
 import com.capitalone.dashboard.repository.ComponentRepository;
 import com.capitalone.dashboard.request.CommitRequest;
+import com.capitalone.dashboard.request.CommitWithExtraParams;
 import com.mysema.query.BooleanBuilder;
-import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-import org.omg.PortableInterceptor.USER_EXCEPTION;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Service
 public class CommitServiceImpl implements CommitService {
@@ -248,6 +249,38 @@ public class CommitServiceImpl implements CommitService {
         }
 
     }
-
+    @Override
+    public DataResponse<Iterable<Commit>> searchWithAssetId(CommitWithExtraParams request) {
+         QCommit commit = new QCommit("search");
+         BooleanBuilder builder = new BooleanBuilder();
+ 
+        
+         builder.and(commit.assetId.eq(request.getAssetId()));
+ 
+         if (request.getNumberOfDays() != null) {
+             long endTimeTarget = new LocalDate().minusDays(request.getNumberOfDays()).toDate().getTime();
+             builder.and(commit.scmCommitTimestamp.goe(endTimeTarget));
+         } else if (request.validCommitDateRange()) {
+             builder.and(commit.scmCommitTimestamp.between(request.getCommitDateBegins(), request.getCommitDateEnds()));
+         }
+ 
+         if (request.validChangesRange()) {
+             builder.and(commit.numberOfChanges.between(request.getChangesGreaterThan(), request.getChangesLessThan()));
+        }
+ 
+         if (!request.getRevisionNumbers().isEmpty()) {
+             builder.and(commit.scmRevisionNumber.in(request.getRevisionNumbers()));
+         }
+ 
+         if (!request.getAuthors().isEmpty()) {
+             builder.and(commit.scmAuthor.in(request.getAuthors()));
+         }
+ 
+         if (StringUtils.isNotBlank(request.getMessageContains())) {
+             builder.and(commit.scmCommitLog.contains(request.getMessageContains()));
+         }
+ 
+        return new DataResponse<>(commitRepository.findAll(builder.getValue()), new Date().getTime());
+     }
 
 }

@@ -62,7 +62,7 @@ public class ProjectDataClientImplTest {
 		assertEquals(2, cnt);
 
 		Scope scope1 = captor.getAllValues().get(0);
-		assertEquals(JIRA_COLLECTORID, scope1.getCollectorId());
+		//assertEquals(JIRA_COLLECTORID, scope1.getCollectorId());
 		assertEquals("100", scope1.getpId());
 		assertEquals("name1", scope1.getName());
 		assertNotNull(scope1.getBeginDate());
@@ -73,7 +73,7 @@ public class ProjectDataClientImplTest {
 		assertNotNull(scope1.getProjectPath());
 
 		Scope scope2 = captor.getAllValues().get(1);
-		assertEquals(JIRA_COLLECTORID, scope2.getCollectorId());
+		//assertEquals(JIRA_COLLECTORID, scope2.getCollectorId());
 		assertEquals("200", scope2.getpId());
 		assertEquals("name2", scope2.getName());
 		assertNotNull(scope2.getBeginDate());

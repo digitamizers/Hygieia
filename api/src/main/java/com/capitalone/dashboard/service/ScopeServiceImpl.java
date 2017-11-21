@@ -125,5 +125,40 @@ public class ScopeServiceImpl implements ScopeService {
 		Page<Scope> scopeItems =  scopeRepository.findAllByCollectorIdAndNameContainingIgnoreCase(collectorId,projectName,pageable);
 		return scopeItems;
 	}
+	
+	/**
+	 * Retrieves the scope information for a given scope source system ID
+	 *
+	 * @param assetId
+	 *
+	 * @return projects
+	 */
+	@Override
+	public List<Scope>  getScopesByAssetId(String assetId) {
+		List<Scope> scopes = scopeRepository.findByAssetId(assetId);
+
+		//clean up needed for < > characters
+		for (Scope scope : scopes) {
+			scope.setName(  scope.getName().replaceAll("[<>]", "")  );
+			scope.setProjectPath(  scope.getProjectPath().replaceAll("[<>]", "")  );
+		}
+
+		return scopes;
+	}
+	
+	/**
+	 * Finds paged results of scope items of a given collectorId, projectName, pageable
+	 *
+	 * @param  assetId
+	 * @param {@link org.springframework.data.domain.Pageable} object to determine which page to return
+	 * @return scope items matching the specified type
+	 */
+	@Override
+	public Page<Scope> getScopeByAssetWithFilter(String assetId, String projectName, Pageable pageable){
+
+		Page<Scope> scopeItems =  scopeRepository.findAllByAssetIdAndNameContainingIgnoreCase(assetId,projectName,pageable);
+		return scopeItems;
+	}
+
 
 }

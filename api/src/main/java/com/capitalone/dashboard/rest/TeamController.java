@@ -67,6 +67,35 @@ public class TeamController {
             @PathVariable String collectorId) {
         return this.teamService.getTeamsByCollector(new ObjectId(collectorId));
     }
+    
+    /**
+    *
+    * @param collectorId
+    *            A given scope-owner's source-system ID
+    * @return A data response list of type Feature containing all features for
+    *         the given team and current sprint
+    */
+   @RequestMapping(value = "/teamasset/{assetId}", method = GET, produces = APPLICATION_JSON_VALUE)
+   public List<Team> teamsByAssetId(
+           @PathVariable String assetId) {
+       return this.teamService.getTeamsByAssetId(assetId);
+   }
+   
+   /**
+   *
+   * @param collectorId, teamName, pageable
+   *
+   * @return A data response list of teams
+   */
+  @RequestMapping(value = "/teamasset/page/{assetId}", method = GET, produces = APPLICATION_JSON_VALUE)
+  public ResponseEntity<List<Team>> teamsByAssetIdPage(
+          @PathVariable String assetId,@RequestParam(value = "search", required = false, defaultValue = "") String descriptionFilter, @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable) {
+      Page<Team> pageTeamItems =  teamService.getTeamByAssetIdWithFilter(assetId,descriptionFilter,pageable);
+      return ResponseEntity
+              .ok()
+              .headers(paginationHeaderUtility.buildPaginationHeaders(pageTeamItems))
+              .body(pageTeamItems.getContent());
+  }
 
     /**
      * REST endpoint for retrieving all features for a given sprint and team

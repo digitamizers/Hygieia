@@ -66,7 +66,7 @@ public class CodeQualityControllerTest {
 				qualities, 1);
 		CodeQualityMetric metric = makeMetric();
 
-		when(codeQualityService.search(Mockito.any(CodeQualityRequest.class)))
+		when(codeQualityService.searchType(Mockito.any(CodeQualityRequest.class)))
 				.thenReturn(response);
 		mockMvc.perform(
 				get("/quality/static-analysis?componentId=" + ObjectId.get() + "&max=1"))
@@ -104,7 +104,7 @@ public class CodeQualityControllerTest {
 		DataResponse<Iterable<CodeQuality>> response = new DataResponse<>(
 				qualities, 1);
 		CodeQualityMetric metric = makeMetric();
-		when(codeQualityService.search(Mockito.any(CodeQualityRequest.class)))
+		when(codeQualityService.searchType(Mockito.any(CodeQualityRequest.class)))
 				.thenReturn(response);
 		mockMvc.perform(
 				get("/quality/security-analysis?componentId=" + ObjectId.get() + "&max=1"))

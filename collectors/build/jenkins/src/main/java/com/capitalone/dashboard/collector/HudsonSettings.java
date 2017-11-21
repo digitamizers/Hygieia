@@ -22,6 +22,7 @@ public class HudsonSettings {
     private List<String> environments;
     private List<String> usernames;
     private List<String> apiKeys;
+    private String assetId;
     private String dockerLocalHostIP; //null if not running in docker on http://localhost
     private int pageSize;
     @Value("${folderDepth:10}")
@@ -79,7 +80,15 @@ public class HudsonSettings {
         this.niceNames = niceNames;
     }
 
-    public List<String> getEnvironments() {
+    public String getAssetId() {
+		return assetId;
+	}
+
+	public void setAssetId(String assetId) {
+		this.assetId = assetId;
+	}
+
+	public List<String> getEnvironments() {
         return environments;
     }
 

@@ -46,6 +46,9 @@ public class Scope extends BaseModel {
 	private String assetState;
 	private String isDeleted;
 	
+	private String assetId;
+	private String orgId;
+	
 	@Transient
     private Collector collector;
 	
@@ -129,6 +132,22 @@ public class Scope extends BaseModel {
 		this.isDeleted = isDeleted;
 	}
 	
+	public String getAssetId() {
+		return assetId;
+	}
+
+	public void setAssetId(String assetId) {
+		this.assetId = assetId;
+	}
+
+	public String getOrgId() {
+		return orgId;
+	}
+
+	public void setOrgId(String orgId) {
+		this.orgId = orgId;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)

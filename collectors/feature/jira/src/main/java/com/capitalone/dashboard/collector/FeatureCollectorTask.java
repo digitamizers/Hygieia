@@ -1,24 +1,27 @@
 package com.capitalone.dashboard.collector;
 
+import org.apache.commons.codec.binary.Base64;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.stereotype.Component;
+
 import com.capitalone.dashboard.client.JiraClient;
 import com.capitalone.dashboard.client.project.ProjectDataClientImpl;
 import com.capitalone.dashboard.client.story.StoryDataClientImpl;
 import com.capitalone.dashboard.client.team.TeamDataClientImpl;
+import com.capitalone.dashboard.integration.VaultIntegrationAPI;
 import com.capitalone.dashboard.model.FeatureCollector;
 import com.capitalone.dashboard.repository.BaseCollectorRepository;
 import com.capitalone.dashboard.repository.FeatureCollectorRepository;
 import com.capitalone.dashboard.repository.FeatureRepository;
 import com.capitalone.dashboard.repository.ScopeRepository;
 import com.capitalone.dashboard.repository.TeamRepository;
-import com.capitalone.dashboard.util.FeatureCollectorConstants;
 import com.capitalone.dashboard.util.CoreFeatureSettings;
+import com.capitalone.dashboard.util.FeatureCollectorConstants;
 import com.capitalone.dashboard.util.FeatureSettings;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.stereotype.Component;
 
 /**
  * Collects {@link FeatureCollector} data from feature content source system.
@@ -36,6 +39,7 @@ public class FeatureCollectorTask extends CollectorTask<FeatureCollector> {
 	private final FeatureCollectorRepository featureCollectorRepository;
 	private final FeatureSettings featureSettings;
 	private final JiraClient jiraClient;
+	private VaultIntegrationAPI vaultIntegrationAPI;
 
 	/**
 	 * Default constructor for the collector task. This will construct this
@@ -55,7 +59,7 @@ public class FeatureCollectorTask extends CollectorTask<FeatureCollector> {
 			TaskScheduler taskScheduler, FeatureRepository featureRepository,
 			TeamRepository teamRepository, ScopeRepository projectRepository,
 			FeatureCollectorRepository featureCollectorRepository, FeatureSettings featureSettings,
-			JiraClient jiraClient) {
+			JiraClient jiraClient, VaultIntegrationAPI vaultIntegrationAPI) {
 		super(taskScheduler, FeatureCollectorConstants.JIRA);
 		this.featureCollectorRepository = featureCollectorRepository;
 		this.teamRepository = teamRepository;
@@ -64,6 +68,7 @@ public class FeatureCollectorTask extends CollectorTask<FeatureCollector> {
 		this.coreFeatureSettings = coreFeatureSettings;
 		this.featureSettings = featureSettings;
 		this.jiraClient = jiraClient;
+		this.vaultIntegrationAPI = vaultIntegrationAPI;
 	}
 
 	/**
@@ -101,6 +106,7 @@ public class FeatureCollectorTask extends CollectorTask<FeatureCollector> {
 		int count = 0;
 
 		try {
+			setCredentials();
 			long teamDataStart = System.currentTimeMillis();
 			TeamDataClientImpl teamData = new TeamDataClientImpl(this.featureCollectorRepository,
 					this.featureSettings, this.teamRepository, jiraClient);
@@ -124,5 +130,22 @@ public class FeatureCollectorTask extends CollectorTask<FeatureCollector> {
 			// catch exception here so we don't blow up the collector completely
 			LOGGER.error("Failed to collect jira information", e);
 		}
+	}
+	
+	private void setCredentials()
+	{
+		
+		JSONObject response=vaultIntegrationAPI.getDetailsFromVault(featureSettings.getAssetId(), featureSettings.getJiraOauthAuthtoken());
+		if(response.has("username"))
+		{
+			featureSettings.setUsername(response.getString("username"));
+			featureSettings.setPassword(response.getString("password"));
+			String jiraCredentials=Base64.encodeBase64String((featureSettings.getUsername()+":"+featureSettings.getPassword()).getBytes());
+			featureSettings.setJiraCredentials(jiraCredentials);
+			
+			
+		}
+		
+		
 	}
 }

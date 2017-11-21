@@ -17,6 +17,7 @@ public class SonarSettings {
     private List<String> servers;
     private List<Double> versions;
     private List<String> metrics;
+    private String assetId;
 
     public String getCron() {
         return cron;
@@ -65,4 +66,12 @@ public class SonarSettings {
     public void setVersions(List<Double> versions) {
         this.versions = versions;
     }
+
+	public String getAssetId() {
+		return assetId;
+	}
+
+	public void setAssetId(String assetId) {
+		this.assetId = assetId;
+	}
 }

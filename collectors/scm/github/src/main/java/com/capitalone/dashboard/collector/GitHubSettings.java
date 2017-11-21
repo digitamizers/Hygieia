@@ -15,6 +15,12 @@ public class GitHubSettings {
     private String cron;
     private String host;
     private String key;
+    private String userId;
+    private String password;
+    private String assetId;
+    private String orgId;
+    private String repoUrl;
+    private String branch;
 	@Value("${github.firstRunHistoryDays:14}")
     private int firstRunHistoryDays;
     private List<String> notBuiltCommits;
@@ -87,5 +93,53 @@ public class GitHubSettings {
 
 	public void setPersonalAccessToken(String personalAccessToken) {
 		this.personalAccessToken = personalAccessToken;
+	}
+	
+	public String getAssetId() {
+		return assetId;
+	}
+
+	public void setAssetId(String assetId) {
+		this.assetId = assetId;
+	}
+
+	public String getOrgId() {
+		return orgId;
+	}
+
+	public void setOrgId(String orgId) {
+		this.orgId = orgId;
+	}
+
+	public String getRepoUrl() {
+		return repoUrl;
+	}
+
+	public void setRepoUrl(String repoUrl) {
+		this.repoUrl = repoUrl;
+	}
+
+	public String getBranch() {
+		return branch;
+	}
+
+	public void setBranch(String branch) {
+		this.branch = branch;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
 	}
 }
