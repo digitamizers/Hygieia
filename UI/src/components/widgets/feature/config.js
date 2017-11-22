@@ -219,7 +219,7 @@
 		}
 
 		function getTeamNames(filter) {
-			return featureData.teamsByCollectorIdPaginated(ctrl.collectorId.id,{"search": filter, "size": 20, "sort": "description", "page": 0}).then(function (response) {
+			return featureData.teamsByAssetIdPaginated("abd123",{"search": filter, "size": 20, "sort": "description", "page": 0}).then(function (response) {
 				if(!angular.isUndefined(filter) && filter.match(/any/i)){
 					var defaultValue={name:'Any',value:'Any',pId:'Any',teamId:'Any'}
 					response.push(defaultValue);
@@ -255,8 +255,8 @@
 					collectorId: collectorId,
 					options: {
 						featureTool: ctrl.collectorId.value,
-						teamName : ctrl.teamId,
-						teamId : ctrl.teamId,
+						teamName : ctrl.selectedTeamObject.name,
+						teamId : ctrl.selectedTeamObject.teamId,
 						projectName : ctrl.projectId ? ctrl.projectId : "",
 						projectId :ctrl.projectId ? ctrl.projectId : ""
 					}

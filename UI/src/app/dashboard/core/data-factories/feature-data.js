@@ -32,6 +32,7 @@
 		var testTeamsByCollectorId = 'test-data/teams.json';
 		var buildTeamsByCollectorId = '/api/teamcollector/';
 		var buildTeamsByCollectorIdPage = '/api/teamcollector/page/';
+		var buildTeamsByAssetIdPage = '/api/teamasset/page/';
 
 		return {
 			sprintMetrics : aggregateSprintEstimates,
@@ -42,7 +43,8 @@
 			projects : projects,
 			projectsByCollectorId : projectsByCollectorId,
 			projectsByCollectorIdPaginated:projectsByCollectorIdPaginated,
-			teamsByCollectorIdPaginated:teamsByCollectorIdPaginated
+			teamsByCollectorIdPaginated:teamsByCollectorIdPaginated,
+			teamsByAssetIdPaginated:teamsByAssetIdPaginated
 		};
 
 		function aggregateSprintEstimates(componentId, filterTeamId, filterProjectId, estimateMetricType, agileType) {
@@ -51,11 +53,11 @@
 					teamId: filterTeamId,
 					agileType: agileType,
 					estimateMetricType: estimateMetricType,
-					assetIdParam:"abd123",
-					orgIdParam:"org1"
+					assetId:"abd123",
+					orgId:"org1"
 				};
 
-			return $http.get(HygieiaConfig.local ? testAggregateSprintEstimates : buildAggregateSprintEstimates, {params: params})
+			return $http.get(HygieiaConfig.local ? testAggregateSprintEstimates : buildAggregateSprintEstimates+filterTeamId, {params: params})
 					.then(function(response) {
 						return response.data;
 					});
@@ -93,8 +95,8 @@
 					projectId: filterProjectId,
 					teamId: filterTeamId,
 					agileType: agileType,
-					assetIdParam:"abd123",
-					orgIdParam:"org1"
+					assetId:"abd123",
+					orgId:"org1"
 				};
 
 			return $http.get(HygieiaConfig.local ? testSprint : buildSprint, {params: params})
@@ -147,6 +149,18 @@
 		 */
 		function teamsByCollectorIdPaginated(collectorId,params) {
 			return $http.get(HygieiaConfig.local ? testTeamsByCollectorId : buildTeamsByCollectorIdPage + collectorId,{params: params})
+				.then(function(response) {
+					return response.data;
+				});
+		}
+		
+		/**
+		 * Retrieves teams by  asset ID
+		 *
+		 * @param assetId
+		 */
+		function teamsByAssetIdPaginated(assetId,params) {
+			return $http.get(HygieiaConfig.local ? testTeamsByCollectorId : buildTeamsByAssetIdPage + assetId,{params: params})
 				.then(function(response) {
 					return response.data;
 				});
