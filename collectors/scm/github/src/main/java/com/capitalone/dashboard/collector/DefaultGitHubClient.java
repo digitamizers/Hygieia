@@ -713,6 +713,11 @@ public class DefaultGitHubClient implements GitHubClient {
         cal.setTime(dt);
         return String.format("%tFT%<tRZ", cal);
     }
+
+	@Override
+	public List<Commit> getCommits() throws RestClientException {
+		return null;
+	}
 }
 
 // X-RateLimit-Remaining
